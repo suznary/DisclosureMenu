@@ -1,0 +1,20 @@
+@charset "UTF-8";
+
+*[aria-hidden="true"] {
+  opacity: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+button[aria-expanded="false"] svg {
+  transform: rotate(180deg);
+}
+
+.primary-link + button {
+  pointer-events: none;
+}
+
+.primary-link + button:focus-visible {
+  opacity: 1;
+  pointer-events: all;
+}
