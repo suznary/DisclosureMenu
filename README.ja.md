@@ -27,7 +27,7 @@ HTMLでは、親ナビゲーション要素とそれを制御するメニュー�
       <a class="primary-link" href="#">Menu 1</a>
     </li>
     <li>
-      <a class="primary-link" href="#">Menu 2</a>
+      <a class="primary-link trigger" href="#">Menu 2</a>
       <button type="button" aria-expanded="false" aria-controls="submenu1">
         <span class="visually-hidden">Open submenu</span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -62,9 +62,22 @@ const navMenu = new DisclosureMenu(document.getElementById('disclosure-nav'), {
 - **isTouchDevice** （ブール値）: デバイスがタッチデバイスであるかを手動で設定します（自動検出を上書き）。
 
 ## メソッド
-- **toggleExpanded(index, expand)**: 特定のインデックスのメニューの展開状態を切り替えます。
-- **setAriaAttribute(index, expand)**: 展開状態に基づいて適切なARIA属性を設定します。
-- **changeTabIndex(index, expand)**: サブメニュー内のフォーカス管理のためにtabindexを更新します。
+### detachAll()
+`detachAll`メソッドは、`DisclosureMenu`インスタンスによって追加されたすべてのイベントリスナーを関連するHTML要素から削除します。この処理は、以下のシナリオで特に重要です：
+
+- **メモリリークの防止**：イベントリスナーが不要になった場合や、ページの一部が動的に削除される場合に、古いリスナーがメモリに残り続けることを防ぎます。
+- **パフォーマンスの向上**：不要なイベントリスナーを削除することで、ページのパフォーマンスを向上させることができます。
+
+#### 使用例
+```javascript
+const navMenu = new DisclosureMenu(document.getElementById('disclosure-nav'));
+
+// 特定の操作後にすべてのイベントリスナーを削除する
+navMenu.detachAll();
+```
+
+#### ※注意
+このクラスを使用する際は、detachAllメソッドを適切なタイミングで呼び出すことを忘れないでください。特に、コンポーネントが不要になった際には、リソースのクリーンアップとして実行することを推奨します。
 
 ## イベント
 `DisclosureMenu`クラスは`keydown`、`mouseenter`、`focusout`などの様々なイベントを処理し、堅牢なユーザーインタラクションモデルを提供します。

@@ -8,6 +8,10 @@ class DisclosureMenu {
   private secondaryMenu: (HTMLElement | null)[];
   private expandedIndex: number | null;
   private isTouchDevice: boolean;
+  private keyboardEventListeners: ((event: KeyboardEvent) => void)[] = [];
+  private mouseEventListeners: ((event: MouseEvent) => void)[] = [];
+  private touchEventListeners: ((event: TouchEvent) => void)[] = [];
+  private focusEventListeners: ((event: FocusEvent) => void)[] = [];
 
   constructor(
     nav: HTMLElement,
@@ -30,10 +34,40 @@ class DisclosureMenu {
         const id = trigger.getAttribute("aria-controls");
         const targetElement = document.getElementById(`${id}`);
         this.secondaryMenu[index] = targetElement;
-      } else {
-        this.secondaryMenu[index] = null;
+
+        const keyboardEventListener = (event: KeyboardEvent) => {
+          this.onKeyDownButton(event, index)
+        };
+        this.keyboardEventListeners[index] = keyboardEventListener;
+
+        const touchEventListener = (event: TouchEvent) => {
+          this.onTouchStartAnchor(event, index)
+        };
+        this.touchEventListeners[index] = touchEventListener;
+        return;
       }
+      
+      if (trigger.classList.contains("trigger")) {
+        this.secondaryMenu[index] = null;
+
+        const mouseEventListener = () => this.onMouseEnter(index + 1);
+        this.mouseEventListeners[index] = mouseEventListener;
+      }
+
+      const keyboardEventListener = (event: KeyboardEvent) => {
+        this.onKeyDownAnchor(event, this.primaryTrigger)
+      }
+      this.keyboardEventListeners[index] = keyboardEventListener;
     })
+
+    this.secondaryMenu.forEach((element, index) => {
+      if (element !== null) {
+        const focusEventListener = (event: FocusEvent) => {
+          this.onFocusOut(event, element);
+        }
+        this.focusEventListeners[index] = focusEventListener;
+      }
+    });
 
     this.initEventListeners();
   }
@@ -41,33 +75,42 @@ class DisclosureMenu {
   private initEventListeners(): void {
     this.primaryTrigger.forEach((trigger, index) => {
       if (trigger.hasAttribute("aria-controls")) {
-        trigger.addEventListener("keydown", (event) => {
-          this.onKeyDownButton(event, index);
-        });
+        trigger.addEventListener(
+          "keydown",
+          this.keyboardEventListeners[index]
+        );
         if (this.isTouchDevice) {
-          trigger.addEventListener("touchstart", (event) => {
-            this.onTouchStartAnchor(event, index);
-          })
+          trigger.addEventListener(
+            "touchstart",
+            this.touchEventListeners[index]
+          );
         }
-      } else {
-        trigger.addEventListener("keydown", (event) => {
-          this.onKeyDownAnchor(event,this.primaryTrigger)
-        })
-        trigger.addEventListener("mouseenter", () => {
-          this.onMouseEnter(index + 1);
-        });
+        return;
       }
+      
+      if (trigger.classList.contains("trigger")) {
+        trigger.addEventListener(
+          "mouseenter",
+          this.mouseEventListeners[index]
+        );
+      }
+
+      trigger.addEventListener(
+        "keydown",
+        this.keyboardEventListeners[index]
+      )  
     })
 
-    this.secondaryMenu.forEach((element) => {
+    this.secondaryMenu.forEach((element, index) => {
       if (element !== null) {
         element.addEventListener(
           "keydown",
           this.onKeyDownControlledElem.bind(this)
         );
-        element.addEventListener("focusout",(event) => {
-          this.onFocusOut(event, element);
-        });
+        element.addEventListener(
+          "focusout",
+          this.focusEventListeners[index]
+        );
         element.parentElement!.addEventListener(
           "mouseleave",
           this.onMouseOut.bind(this)
@@ -78,6 +121,57 @@ class DisclosureMenu {
     this.nav.addEventListener("focusout", (event) => {
       this.onFocusOut(event, this.nav);
     });
+  }
+
+  /**
+   * detachAll
+   * This method removes event listeners from all HTMLElement held by the class.
+   */
+  public detachAll() {
+    this.primaryTrigger.forEach((trigger, index) => {
+      if (trigger.hasAttribute("aria-controls")) {
+        trigger.removeEventListener(
+          "keydown",
+          this.keyboardEventListeners[index]
+        );
+        if (this.isTouchDevice) {
+          trigger.removeEventListener(
+            "touchstart",
+            this.touchEventListeners[index]
+          );
+        }
+        return;
+      }
+      
+      if (trigger.classList.contains("trigger")) {
+        trigger.removeEventListener(
+          "mouseenter",
+          this.mouseEventListeners[index]
+        );
+      }
+
+      trigger.removeEventListener(
+        "keydown",
+        this.keyboardEventListeners[index]
+      )  
+    })
+
+    this.secondaryMenu.forEach((element, index) => {
+      if (element !== null) {
+        element.removeEventListener(
+          "keydown",
+          this.onKeyDownControlledElem.bind(this)
+        );
+        element.removeEventListener(
+          "focusout",
+          this.focusEventListeners[index]
+        );
+        element.parentElement!.removeEventListener(
+          "mouseleave",
+          this.onMouseOut.bind(this)
+        );
+      }
+    })
   }
 
   private setAriaAttribute(

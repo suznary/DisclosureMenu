@@ -61,10 +61,23 @@ The `DisclosureMenu` constructor accepts an optional `options` object with the f
 
 - **isTouchDevice** (boolean): Manually set if the device is a touch device (overrides automatic detection).
 
-## Methods
-- **toggleExpanded(index, expand)**: Toggles the expansion state of a menu at a given index.
-- **setAriaAttribute(index, expand)**: Sets the appropriate ARIA attributes based on the expanded state.
-- **changeTabIndex(index, expand)**: Updates the tabindex for focus management within the submenu.
+## メソッド
+### detachAll()
+The `DisclosureMenu` class provides methods for adding and managing event listeners on specified HTML elements. This class allows you to monitor click events on these elements and apply specific actions to each.
+
+- **Preventing Memory Leaks**: Prevents old listeners from lingering in memory when they are no longer needed, or when parts of the page are dynamically removed.
+- **Improving Performance**: Enhances page performance by removing unnecessary event listeners.
+
+#### Usage Example
+```javascript
+const navMenu = new DisclosureMenu(document.getElementById('disclosure-nav'));
+
+// When you need to remove all event listeners after certain operations
+navMenu.detachAll();
+```
+
+#### ※Attention
+When using this class, do not forget to call the detachAll method at appropriate times. It is recommended to execute this as part of resource cleanup when the component is no longer needed.
 
 ## Events
 The `DisclosureMenu` class handles various events such as `keydown`, `mouseenter`, and `focusout` to provide a robust user interaction model.
