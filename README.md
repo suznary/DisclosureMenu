@@ -8,6 +8,10 @@ The `DisclosureMenu` class is a customizable, accessible navigation menu managem
 - **Touch & Keyboard Support**: Handles both touch and keyboard interactions.
 - **Dynamic State Management**: Automatically manages the expanded and collapsed states of menu items.
 
+## Demo
+Experience the functionality of our `DisclosureMenu` class firsthand by visiting the demo page.
+[View Demo](https://suznary.info/sample/DisclosureMenu/)
+
 ## Installation
 To integrate the `DisclosureMenu` into your project, include the class file in your project and use it as a module.
 
