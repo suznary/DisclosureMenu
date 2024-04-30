@@ -35,12 +35,12 @@ class DisclosureMenu {
         this.secondaryMenu[index] = targetElement;
 
         const keyboardEventListener = (event: KeyboardEvent) => {
-          this.onKeyDownButton(event, index)
+          this.handleKeyDownOnButton(event, index)
         };
         this.keyboardEventListeners[index] = keyboardEventListener;
 
         const touchEventListener = (event: TouchEvent) => {
-          this.onTouchStartAnchor(event, index)
+          this.handleTouchStartOnButton(event, index)
         };
         this.touchEventListeners[index] = touchEventListener;
         return;
@@ -49,12 +49,12 @@ class DisclosureMenu {
       if (trigger.classList.contains("trigger")) {
         this.secondaryMenu[index] = null;
 
-        const mouseEventListener = () => this.onMouseEnter(index + 1);
+        const mouseEventListener = () => this.handleMouseEnter(index + 1);
         this.mouseEventListeners[index] = mouseEventListener;
       }
 
       const keyboardEventListener = (event: KeyboardEvent) => {
-        this.onKeyDownAnchor(event, this.primaryTrigger)
+        this.handleKeyDownOnAnchor(event, this.primaryTrigger)
       }
       this.keyboardEventListeners[index] = keyboardEventListener;
     });
@@ -108,7 +108,7 @@ class DisclosureMenu {
       if (element !== null) {
         element.addEventListener(
           "keydown",
-          this.onKeyDownControlledElem.bind(this)
+          this.handleKeyDownOnSecondaryMenu.bind(this)
         );
         element.addEventListener(
           "focusout",
@@ -116,7 +116,7 @@ class DisclosureMenu {
         );
         element.parentElement!.addEventListener(
           "mouseleave",
-          this.onMouseOut.bind(this)
+          this.handleMouseLeave.bind(this)
         );
       }
     })
@@ -164,7 +164,7 @@ class DisclosureMenu {
       if (element !== null) {
         element.removeEventListener(
           "keydown",
-          this.onKeyDownControlledElem
+          this.handleKeyDownOnSecondaryMenu
         );
         element.removeEventListener(
           "focusout",
@@ -172,7 +172,7 @@ class DisclosureMenu {
         );
         element.parentElement!.removeEventListener(
           "mouseleave",
-          this.onMouseOut
+          this.handleMouseLeave
         );
       }
     })
@@ -214,7 +214,7 @@ class DisclosureMenu {
     this.changeTabIndex(index, expand);
   }
 
-  private onMouseEnter(
+  private handleMouseEnter(
     index: number,
   ): void {
     if (this.expandedIndex !== null && this.secondaryMenu[index] !== null) {
@@ -224,7 +224,7 @@ class DisclosureMenu {
     this.expandedIndex = index;
   }
 
-  private onMouseOut(): void {
+  private handleMouseLeave(): void {
     if (this.expandedIndex !== null) {
       this.toggleExpanded(this.expandedIndex, false);
       this.expandedIndex = null;
@@ -258,7 +258,7 @@ class DisclosureMenu {
     }
   }
 
-  private onKeyDownAnchor(
+  private handleKeyDownOnAnchor(
     event: KeyboardEvent,
     targetArray: HTMLElement[]
   ): void {
@@ -268,7 +268,7 @@ class DisclosureMenu {
   }
   
 
-  private onKeyDownControlledElem(
+  private handleKeyDownOnSecondaryMenu(
     event: KeyboardEvent
   ) {
     if (
@@ -283,7 +283,7 @@ class DisclosureMenu {
         const targetArray = Array.from(
           this.secondaryMenu[this.expandedIndex]!.querySelectorAll<HTMLElement>('a')
         );
-        this.onKeyDownAnchor(event, targetArray);
+        this.handleKeyDownOnAnchor(event, targetArray);
       }
     }
   }
@@ -314,7 +314,7 @@ class DisclosureMenu {
     }
   }
 
-  private onKeyDownButton(
+  private handleKeyDownOnButton(
     event: KeyboardEvent,
     index: number
   ): void {
@@ -329,7 +329,7 @@ class DisclosureMenu {
     }
   }
 
-  private onTouchStartAnchor(
+  private handleTouchStartOnButton(
     event: TouchEvent,
     index: number
   ): void {
