@@ -11,8 +11,8 @@ class DisclosureMenu {
   private keyboardEventListeners: ((event: KeyboardEvent) => void)[] = [];
   private mouseEventListeners: ((event: MouseEvent) => void)[] = [];
   private touchEventListeners: ((event: TouchEvent) => void)[] = [];
-  private focusEventListeners: ((event: FocusEvent) => void)[] = [];
-  private focusOutListeners: (event: FocusEvent) => void;
+  private focusOutListenersForSecondaryMenu: ((event: FocusEvent) => void)[] = [];
+  private focusOutListenersForNavigation: (event: FocusEvent) => void;
 
   constructor(
     nav: HTMLElement,
@@ -62,14 +62,14 @@ class DisclosureMenu {
     this.secondaryMenu.forEach((element, index) => {
       if (element !== null) {
         const focusEventListener = (event: FocusEvent) => {
-          this.onFocusOut(event, element);
+          this.handleFocusOutFromNavigation(event, element);
         }
-        this.focusEventListeners[index] = focusEventListener;
+        this.focusOutListenersForSecondaryMenu[index] = focusEventListener;
       }
     });
 
-    this.focusOutListeners = (event: FocusEvent) => {
-      this.onFocusOut(event, this.nav);
+    this.focusOutListenersForNavigation = (event: FocusEvent) => {
+      this.handleFocusOutFromNavigation(event, this.nav);
     }
 
     this.initEventListeners();
@@ -112,7 +112,7 @@ class DisclosureMenu {
         );
         element.addEventListener(
           "focusout",
-          this.focusEventListeners[index]
+          this.focusOutListenersForSecondaryMenu[index]
         );
         element.parentElement!.addEventListener(
           "mouseleave",
@@ -123,7 +123,7 @@ class DisclosureMenu {
 
     this.nav.addEventListener(
       "focusout",
-      this.focusOutListeners
+      this.focusOutListenersForNavigation
     );
   }
 
@@ -168,7 +168,7 @@ class DisclosureMenu {
         );
         element.removeEventListener(
           "focusout",
-          this.focusEventListeners[index]
+          this.focusOutListenersForSecondaryMenu[index]
         );
         element.parentElement!.removeEventListener(
           "mouseleave",
@@ -179,7 +179,7 @@ class DisclosureMenu {
 
     this.nav.removeEventListener(
       "focusout",
-      this.focusOutListeners
+      this.focusOutListenersForNavigation
     );
   }
 
@@ -214,6 +214,14 @@ class DisclosureMenu {
     this.changeTabIndex(index, expand);
   }
 
+/**
+ * handleMouseEnter
+ * Handles the mouse entering an anchor element of the primary trigger.
+ * If there is a secondary menu associated with another primary trigger, it is hidden.
+ * The secondary menu associated with the current primary trigger is displayed.
+ *
+ * @param {number} index - The index of the primary trigger in the array
+ */
   private handleMouseEnter(
     index: number,
   ): void {
@@ -224,6 +232,11 @@ class DisclosureMenu {
     this.expandedIndex = index;
   }
 
+/**
+ * handleMouseLeave
+ * Handles the mouse leaving a secondary menu element.
+ * If there is a displayed secondary menu, it is hidden.
+ */
   private handleMouseLeave(): void {
     if (this.expandedIndex !== null) {
       this.toggleExpanded(this.expandedIndex, false);
@@ -258,6 +271,14 @@ class DisclosureMenu {
     }
   }
 
+/**
+ * handleKeyDownOnAnchor
+ * Handles a key press on anchor element.
+ * If an arrow key is pressed, the focus moves between the primary trigger and secondary menu anchors.
+ *
+ * @param {KeyboardEvent} event - The keyboard event object
+ * @param {HTMLElement[]} targetArray - The array of elements to move focus between
+ */
   private handleKeyDownOnAnchor(
     event: KeyboardEvent,
     targetArray: HTMLElement[]
@@ -266,7 +287,15 @@ class DisclosureMenu {
     const currentIndex = targetArray.indexOf(activeElement);
     this.moveFocusByKey(event, targetArray, currentIndex);
   }
-  
+
+/**
+ * handleKeyDownOnSecondaryMenu
+ * Handles a key press within the secondary menu.
+ * If the Escape key is pressed, focus is moved to the associated primary trigger, and the secondary menu is hidden.
+ * If an arrow key is pressed, focus is moved between the links within the secondary menu.
+ *
+ * @param {KeyboardEvent} event - The keyboard event object
+ */
 
   private handleKeyDownOnSecondaryMenu(
     event: KeyboardEvent
@@ -314,6 +343,15 @@ class DisclosureMenu {
     }
   }
 
+/**
+ * handleKeyDownOnButton
+ * Handles a key press on a button-type primary trigger.
+ * If the Enter or Space key is pressed, the associated secondary menu is toggled between visible and hidden.
+ * If an arrow key is pressed, focus is moved to the associated secondary menu or between the primary triggers.
+ *
+ * @param {KeyboardEvent} event - The keyboard event object
+ * @param {number} index - The index of the primary trigger in the array
+ */
   private handleKeyDownOnButton(
     event: KeyboardEvent,
     index: number
@@ -329,6 +367,14 @@ class DisclosureMenu {
     }
   }
 
+/**
+ * handleTouchStartOnButton
+ * Handles a touch start event on a button-type primary trigger.
+ * The associated secondary menu is toggled between visible and hidden.
+ *
+ * @param {TouchEvent} event - The touch event object
+ * @param {number} index - The index of the primary trigger in the array
+ */
   private handleTouchStartOnButton(
     event: TouchEvent,
     index: number
@@ -340,7 +386,19 @@ class DisclosureMenu {
     this.expandedIndex = expand ? index : null;
   }
 
-  private onFocusOut(event: FocusEvent, targetElement: HTMLElement): void {
+/**
+ * handleFocusOutEvent
+ * Handles the focus leaving a specific element.
+ * If the focus remains within the element, no action is taken.
+ * If the focus moves outside the element, any displayed secondary menu is hidden.
+ *
+ * @param {FocusEvent} event - The focus event object
+ * @param {HTMLElement} targetElement - The element that lost focus
+ */
+  private handleFocusOutFromNavigation(
+    event: FocusEvent,
+    targetElement: HTMLElement
+  ): void {
     const isFocusInTarget = targetElement.contains(
       event.relatedTarget as Node | null
     );
