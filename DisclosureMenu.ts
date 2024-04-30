@@ -4,14 +4,15 @@ interface DisclosureMenuOptions {
 
 class DisclosureMenu {
   private nav: HTMLElement;
-  private primaryTrigger: HTMLElement[];
-  private secondaryMenu: (HTMLElement | null)[];
-  private expandedIndex: number | null;
-  private isTouchDevice: boolean;
+  private primaryTrigger: HTMLElement[] = [];
+  private secondaryMenu: (HTMLElement | null)[] = [];
+  private expandedIndex: number | null = null;
+  private isTouchDevice: boolean = false;
   private keyboardEventListeners: ((event: KeyboardEvent) => void)[] = [];
   private mouseEventListeners: ((event: MouseEvent) => void)[] = [];
   private touchEventListeners: ((event: TouchEvent) => void)[] = [];
   private focusEventListeners: ((event: FocusEvent) => void)[] = [];
+  private focusOutListeners: (event: FocusEvent) => void;
 
   constructor(
     nav: HTMLElement,
@@ -23,8 +24,6 @@ class DisclosureMenu {
         "a.primary-link, button[aria-controls]"
       )
     );
-    this.secondaryMenu = [];
-    this.expandedIndex = null;
     this.isTouchDevice = options?.isTouchDevice ||
       "ontouchstart" in window ||
       navigator.maxTouchPoints > 0;
@@ -58,7 +57,7 @@ class DisclosureMenu {
         this.onKeyDownAnchor(event, this.primaryTrigger)
       }
       this.keyboardEventListeners[index] = keyboardEventListener;
-    })
+    });
 
     this.secondaryMenu.forEach((element, index) => {
       if (element !== null) {
@@ -68,6 +67,10 @@ class DisclosureMenu {
         this.focusEventListeners[index] = focusEventListener;
       }
     });
+
+    this.focusOutListeners = (event: FocusEvent) => {
+      this.onFocusOut(event, this.nav);
+    }
 
     this.initEventListeners();
   }
@@ -118,9 +121,10 @@ class DisclosureMenu {
       }
     })
 
-    this.nav.addEventListener("focusout", (event) => {
-      this.onFocusOut(event, this.nav);
-    });
+    this.nav.addEventListener(
+      "focusout",
+      this.focusOutListeners
+    );
   }
 
   /**
@@ -160,7 +164,7 @@ class DisclosureMenu {
       if (element !== null) {
         element.removeEventListener(
           "keydown",
-          this.onKeyDownControlledElem.bind(this)
+          this.onKeyDownControlledElem
         );
         element.removeEventListener(
           "focusout",
@@ -168,10 +172,15 @@ class DisclosureMenu {
         );
         element.parentElement!.removeEventListener(
           "mouseleave",
-          this.onMouseOut.bind(this)
+          this.onMouseOut
         );
       }
     })
+
+    this.nav.removeEventListener(
+      "focusout",
+      this.focusOutListeners
+    );
   }
 
   private setAriaAttribute(
@@ -208,7 +217,7 @@ class DisclosureMenu {
   private onMouseEnter(
     index: number,
   ): void {
-    if (this.expandedIndex !== null) {
+    if (this.expandedIndex !== null && this.secondaryMenu[index] !== null) {
       this.toggleExpanded(this.expandedIndex, false);
     }
     this.toggleExpanded(index, true);
