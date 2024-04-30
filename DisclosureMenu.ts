@@ -198,9 +198,7 @@ class DisclosureMenu {
     expand: boolean
   ): void {
     const tabIndexValue = expand ? "0" : "-1";
-    const anchors = Array.from(
-      this.secondaryMenu[index]!.querySelectorAll<HTMLElement>("a")
-    );
+    const anchors = this.secondaryMenu[index]!.querySelectorAll<HTMLElement>("a");
     anchors.forEach((a) => {
       a.setAttribute("tabindex", tabIndexValue);
     });
